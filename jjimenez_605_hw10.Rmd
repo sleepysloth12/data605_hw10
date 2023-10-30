@@ -1,0 +1,97 @@
+---
+title: 'Data 605 Homework #10'
+author: "Jean Jimenez"
+date: "2023-10-30"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question
+
+Smith is in jail and has 1 dollar; he can get out on bail if he has 8 dollars. A guard agrees to make a series of bets with him. If Smith bets A dollars, he wins A dollars with probability 0.4 and loses A dollars with probability 0.6.
+
+Find the probability that he wins 8 dollars before losing all of his money if:
+
+(a) he bets 1 dollar each time (timid strategy).
+
+(b) he bets, each time, as much as possible but not more than necessary to
+bring his fortune up to 8 dollars (bold strategy).
+
+(c) Which strategy gives Smith the better chance of getting out of jail?
+
+# Work and Answers {.tabset}
+
+## A
+
+If he bets 1 dollar each time (timid strategy).
+
+```{r}
+timid = function() {
+  p = numeric(9)
+  p[1] = 0
+  p[9] = 1
+  
+  for (iter in 1:10000) {
+    for (j in 2:8) {
+      p[j] = 0.4 * p[j + 1] + 0.6 * p[j - 1]
+    }
+  }
+  return(p[2])
+}
+
+timid_p = timid()
+
+cat("The Probability of Smith getting out of jail using timid strategy is", timid_p,"or", timid_p *100,  "% \n")
+```
+
+## B
+
+If he bets, each time, as much as possible but not more than necessary to
+bring his fortune up to 8 dollars (bold strategy).
+
+```{r}
+bold = function() {
+  p = numeric(9)
+  p[1] = 0
+  p[9] = 1
+  
+  for (iter in 1:10000) {
+    for (j in 2:8) {
+      A = min(j, 8 - j)
+      if (j + A <= 8 && j - A >= 1) {
+        p[j] = 0.4 * p[j + A] + 0.6 * p[j - A]
+      } else if (j + A > 8) {
+        p[j] = 0.4 * p[8] + 0.6 * p[j - A]
+      } else if (j - A < 1) {
+        p[j] = 0.4 * p[j + A] + 0.6 * p[1]
+      }
+    }
+  }
+  return(p[2])
+}
+
+
+bold_p = bold()
+
+
+cat("The probability of Smith getting out of jail using bold strategy is", bold_p,"or", bold_p*100,"%\n")
+```
+
+## C
+
+Which strategy gives Smith the better chance of getting out of jail?
+
+```{r}
+if (timid_p > bold_p) {
+  cat("The timid strategy gives Smith a better chance of getting out of jail.")
+} else {
+  cat("The bold strategy gives Smith a better chance of getting out of jail.")
+}
+
+```
